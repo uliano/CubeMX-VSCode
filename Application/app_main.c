@@ -12,7 +12,6 @@ void app_main(void)
 
   while (1)
   {
-
     printf("Tick: %" PRIu32 "\n", tick_counter++);
     HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
     HAL_Delay(1000);

@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#include "main.h"
+#include "main.h"  // IWYU pragma: keep - needed by app_main.c for HAL dependencies
 
 #ifdef __cplusplus
 }
