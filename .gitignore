@@ -20,4 +20,7 @@ Thumbs.db
 *.tmp
 *.bak
 
+# Generated files
+compile_commands.json
+
 *.claude/
