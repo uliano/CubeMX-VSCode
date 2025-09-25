@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"ms-vscode.cpptools",
+		"marus25.cortex-debug",
+		//optional
+		"llvm-vs-code-extensions.vscode-clangd",
+		"xaver.clang-format"
+	]
+}

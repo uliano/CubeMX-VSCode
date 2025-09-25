@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ST-Link Run",
+            "cwd": "${workspaceFolder}",
+            "executable": "${command:cmake.launchTargetPath}",
+            "request": "launch",                    // Carica firmware e avvia debug
+            "type": "cortex-debug",
+            "servertype": "stutil",                 // Usa st-util (stlink-tools) invece di ST-LINK_gdbserver!
+            "interface": "swd",
+            "showDevDebugOutput": "both",
+            "v1": false,                            // ST-Link version
+            "device": "STM32G071RB",                // MCU used [optional]
+            "serialNumber": "",                     // Set ST-Link ID if you use multiple at the same time [optional]
+            "runToEntryPoint": "main",              // Run to main and stop there [optional]
+            "svdFile": "STM32G071.svd"    // SVD file to see registers [optional]
+        },
+        {
+            "name": "ST-Link Attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "${command:cmake.launchTargetPath}",
+            "request": "attach",                    // Si attacca a target già in esecuzione, non carica firmware
+            "type": "cortex-debug",
+            "servertype": "stutil",                 // Usa st-util (stlink-tools)
+            "interface": "swd",
+            "showDevDebugOutput": "both",
+            "v1": false,                            // ST-Link version
+            "device": "STM32G071RB",                // MCU used [optional]
+            "serialNumber": "",                     // Set ST-Link ID if you use multiple at the same time [optional]
+            "svdFile": "STM32G071.svd"    // SVD file to see registers [optional]
+        }
+    ]
+}

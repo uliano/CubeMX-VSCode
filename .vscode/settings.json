@@ -1,0 +1,14 @@
+{
+  "clangd.arguments": [
+    "-pretty",
+    "--background-index",
+    "--compile-commands-dir=${workspaceFolder}",
+    "--completion-style=detailed"
+  ],
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.default.configurationProvider": "clangd",
+  "files.associations": {
+    "*.lst": "arm"
+  },
+  "editor.colorDecorators": false
+}

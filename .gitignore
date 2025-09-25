@@ -1,0 +1,23 @@
+# Build directories
+build/
+.cache/
+
+# Generated documentation
+docs/
+
+# CubeMX (keep only .ioc files)
+CubeMX/*
+!CubeMX/*.ioc
+
+# SVD files (microcontroller-specific)
+*.svd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+
+*.claude/
