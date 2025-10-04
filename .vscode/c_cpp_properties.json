@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "ARM",
+            "includePath": [
+                "${workspaceFolder}/Application",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/CubeMX/Core/Inc",
+                "${workspaceFolder}/CubeMX/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                "${workspaceFolder}/CubeMX/Drivers/CMSIS/Include",
+                "${workspaceFolder}/CubeMX/Drivers/STM32F4xx_HAL_Driver/Inc",
+                "${workspaceFolder}/CubeMX/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32F401xC"
+            ],
+            "compilerPath": "/opt/arm-gcc-15/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}

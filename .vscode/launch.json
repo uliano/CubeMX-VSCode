@@ -4,31 +4,83 @@
         {
             "name": "ST-Link Run",
             "cwd": "${workspaceFolder}",
-            "executable": "${command:cmake.launchTargetPath}",
-            "request": "launch",                    // Carica firmware e avvia debug
+            "executable": "${workspaceFolder}/build/firmware.elf",
+            "request": "launch",
             "type": "cortex-debug",
-            "servertype": "stutil",                 // Usa st-util (stlink-tools) invece di ST-LINK_gdbserver!
+            "servertype": "stutil",
             "interface": "swd",
             "showDevDebugOutput": "both",
-            "v1": false,                            // ST-Link version
-            "device": "STM32G071RB",                // MCU used [optional]
-            "serialNumber": "",                     // Set ST-Link ID if you use multiple at the same time [optional]
-            "runToEntryPoint": "main",              // Run to main and stop there [optional]
-            "svdFile": "STM32G071.svd"    // SVD file to see registers [optional]
+            "v1": false,
+            "device": "STM32F401xC",
+            "serialNumber": "",
+            "runToEntryPoint": "main",
+            "svdFile": "STM32F401.svd"
         },
         {
             "name": "ST-Link Attach",
             "cwd": "${workspaceFolder}",
-            "executable": "${command:cmake.launchTargetPath}",
-            "request": "attach",                    // Si attacca a target già in esecuzione, non carica firmware
+            "executable": "${workspaceFolder}/build/firmware.elf",
+            "request": "attach",
             "type": "cortex-debug",
-            "servertype": "stutil",                 // Usa st-util (stlink-tools)
+            "servertype": "stutil",
             "interface": "swd",
             "showDevDebugOutput": "both",
-            "v1": false,                            // ST-Link version
-            "device": "STM32G071RB",                // MCU used [optional]
-            "serialNumber": "",                     // Set ST-Link ID if you use multiple at the same time [optional]
-            "svdFile": "STM32G071.svd"    // SVD file to see registers [optional]
+            "v1": false,
+            "device": "STM32F401xC",
+            "serialNumber": "",
+            "svdFile": "STM32F401.svd"
+        },
+        {
+            "name": "Black Magic Probe Run",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/firmware.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "bmp",
+            "BMPGDBSerialPort": "/dev/ttyACM0",
+            "interface": "swd",
+            "showDevDebugOutput": "both",
+            "device": "STM32F401xC",
+            "runToEntryPoint": "main",
+            "svdFile": "STM32F401.svd"
+        },
+        {
+            "name": "Black Magic Probe Attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/firmware.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "bmp",
+            "BMPGDBSerialPort": "/dev/ttyACM0",
+            "interface": "swd",
+            "showDevDebugOutput": "both",
+            "device": "STM32F401xC",
+            "svdFile": "STM32F401.svd"
+        },
+        {
+            "name": "J-Link Run",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/firmware.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "interface": "swd",
+            "showDevDebugOutput": "both",
+            "device": "STM32F401RC",
+            "runToEntryPoint": "main",
+            "svdFile": "STM32F401.svd"
+        },
+        {
+            "name": "J-Link Attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/firmware.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "interface": "swd",
+            "showDevDebugOutput": "both",
+            "device": "STM32F401RC",
+            "svdFile": "STM32F401.svd"
         }
     ]
 }

@@ -1,6 +1,5 @@
 # Project Configuration
-PROJECT_NAME = MyApp
-TARGET = $(PROJECT_NAME)
+TARGET = firmware
 
 # Toolchain Configuration
 ARM_TOOLCHAIN_PATH = /opt/arm-gcc-15/bin
@@ -13,7 +12,7 @@ OBJDUMP = $(TOOLCHAIN_PREFIX)objdump
 SIZE = $(TOOLCHAIN_PREFIX)size
 
 # MCU Configuration (STM32G071xx)
-MCU_ARCH = -mthumb -mcpu=cortex-m0plus
+MCU_ARCH = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 # Build directories
 BUILD_DIR = build
@@ -48,7 +47,7 @@ OBJECTS = $(C_OBJECTS) $(CXX_OBJECTS) $(ASM_OBJECTS)
 DEPS = $(C_OBJECTS:.o=.d) $(CXX_OBJECTS:.o=.d) $(ASM_OBJECTS:.o=.d)
 
 # Compiler defines
-DEFINES = -DUSE_HAL_DRIVER -DSTM32G071xx
+DEFINES = -DUSE_HAL_DRIVER -DSTM32F401xC
 
 # Compiler flags (RelWithDebInfo equivalent: -O2 -g -DNDEBUG)
 COMMON_FLAGS = $(MCU_ARCH) -fdata-sections -ffunction-sections --specs=nano.specs -O2 -g -DNDEBUG
@@ -109,15 +108,37 @@ $(BUILD_DIR)/$(TARGET).lst: $(BUILD_DIR)/$(TARGET).elf
 	@echo "Creating $@..."
 	@$(OBJDUMP) -h -S $< | sed '/^ *[0-9a-f][0-9a-f]*:/!{/^[0-9a-f][0-9a-f]* <.*>:/!s/^[[:space:]]*\(.\)/@ \1/}' > $@
 
-# Flash firmware to device
+# Flash firmware to device (ST-Link)
 flash: $(BUILD_DIR)/$(TARGET).elf
 	@echo "Flashing $(TARGET)..."
 	@st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 
-# Reset device
+# Flash firmware with Black Magic Probe
+flash-bmp: $(BUILD_DIR)/$(TARGET).elf
+	@echo "Flashing $(TARGET) via Black Magic Probe..."
+	@arm-none-eabi-gdb --batch \
+		-ex "target extended-remote /dev/ttyACM0" \
+		-ex "monitor swdp_scan" \
+		-ex "attach 1" \
+		-ex "load" \
+		-ex "compare-sections" \
+		-ex "kill" \
+		$(BUILD_DIR)/$(TARGET).elf
+
+# Reset device (ST-Link)
 reset:
 	@echo "Resetting device..."
 	@st-flash reset
+
+# Reset device (Black Magic Probe)
+reset-bmp:
+	@echo "Resetting device via Black Magic Probe..."
+	@arm-none-eabi-gdb --batch \
+		-ex "target extended-remote /dev/ttyACM0" \
+		-ex "monitor swdp_scan" \
+		-ex "attach 1" \
+		-ex "monitor reset" \
+		-ex "kill"
 
 # Clean build artifacts
 clean:
@@ -129,7 +150,6 @@ compile_commands: clean
 
 # Debug info
 info:
-	@echo "Project: $(PROJECT_NAME)"
 	@echo "Target: $(TARGET)"
 	@echo "Linker script: $(LINKER_SCRIPT)"
 	@echo "C sources ($(words $(C_SOURCES))): $(C_SOURCES)"
@@ -137,4 +157,4 @@ info:
 	@echo "ASM sources ($(words $(ASM_SOURCES))): $(ASM_SOURCES)"
 	@echo "Include dirs ($(words $(INCLUDE_DIRS))): $(INCLUDE_DIRS)"
 
-.PHONY: all clean compile_commands info flash reset
+.PHONY: all clean compile_commands info flash flash-bmp reset reset-bmp

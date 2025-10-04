@@ -104,26 +104,49 @@ This ensures all necessary files are versioned in your project repository.
 
 ### 7. Update VS Code Configuration
 
-Edit `.vscode/launch.json`:
+Edit `.vscode/launch.json` and `.vscode/c_cpp_properties.json` to match your MCU:
 
+**launch.json** - Update device and svdFile in all configurations:
 ```json
-{
-    "device": "STM32G071RB",     // Your MCU part number
-    "svdFile": "STM32G071.svd"   // Your SVD filename
-}
+"device": "STM32F401xC",
+"svdFile": "STM32F401.svd"
 ```
 
-### 8. Update MCU Parameters (If Different MCU)
+**c_cpp_properties.json** - Update defines:
+```json
+"defines": [
+    "USE_HAL_DRIVER",
+    "STM32F401xC"
+]
+```
 
-If using a different microcontroller than STM32G071xx, edit the Makefile:
+### 8. Update MCU Parameters
 
+**CRITICAL**: When using a different microcontroller, you **MUST** update the MCU architecture and compiler defines in the Makefile, otherwise the build will fail.
+
+Edit the Makefile:
+
+**MCU Architecture:**
 ```make
-# MCU Configuration (STM32G071xx)
-MCU_ARCH = -mthumb -mcpu=cortex-m0plus    # Adjust for your MCU
-
-# Compiler defines
-DEFINES = -DUSE_HAL_DRIVER -DSTM32G071xx  # Adjust for your MCU
+# MCU Configuration
+MCU_ARCH = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 ```
+
+Common architectures:
+- **Cortex-M0+**: `-mthumb -mcpu=cortex-m0plus` (STM32G0, STM32L0)
+- **Cortex-M3**: `-mthumb -mcpu=cortex-m3` (STM32F1, STM32L1)
+- **Cortex-M4**: `-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16` (STM32F4, STM32L4)
+- **Cortex-M7**: `-mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16` (STM32F7, STM32H7)
+
+**Compiler Defines:**
+```make
+# Compiler defines
+DEFINES = -DUSE_HAL_DRIVER -DSTM32F401xC
+```
+
+Change to match your exact MCU model.
+
+**Warning**: Mismatched architecture settings will cause compilation errors with missing intrinsic functions like `__LDREXW` and `__STREXW`.
 
 ## Build and Debug
 
@@ -132,10 +155,10 @@ DEFINES = -DUSE_HAL_DRIVER -DSTM32G071xx  # Adjust for your MCU
 make
 
 # Build specific target
-make build/MyApp.elf   # Executable
-make build/MyApp.hex   # Intel HEX
-make build/MyApp.bin   # Binary
-make build/MyApp.lst   # Assembly listing with source
+make build/firmware.elf   # Executable
+make build/firmware.hex   # Intel HEX
+make build/firmware.bin   # Binary
+make build/firmware.lst   # Assembly listing with source
 
 # Clean build
 make clean
@@ -143,17 +166,24 @@ make clean
 # Generate compile_commands.json for Clangd
 make compile_commands
 
-# Flash firmware to device
+# Flash firmware to device (ST-Link)
 make flash
 
-# Reset device
+# Flash firmware to device (Black Magic Probe)
+make flash-bmp
+
+# Reset device (ST-Link)
 make reset
+
+# Reset device (Black Magic Probe)
+make reset-bmp
 
 # Show project information
 make info
 
 # Debug with VS Code
-# Use "ST-Link Run" configuration
+# 8 configurations available: ST-Link, BMP, J-Link (OpenOCD), J-Link (Native)
+# Each with Run (flash+debug) and Attach (debug only) modes
 ```
 
 ## Development Workflow
@@ -224,8 +254,9 @@ Reusable libraries, drivers, and utilities.
 2. Generate new CubeMX project
 3. Add `app_main()` calls to generated main.c
 4. Download new SVD file
-5. Update launch.json with new MCU name and SVD file
-6. Update `Makefile` MCU parameters if needed (CPU arch and defines)
+5. Update `launch.json` with new MCU name and SVD file (all configurations)
+6. Update `c_cpp_properties.json` with new MCU defines
+7. Update `Makefile` MCU parameters (CPU arch and defines)
 
 ## VS Code Configuration
 
@@ -233,26 +264,77 @@ Reusable libraries, drivers, and utilities.
 The project includes pre-configured extension recommendations in `.vscode/extensions.json`:
 
 **Essential:**
-- **clangd** (`llvm-vs-code-extensions.vscode-clangd`) - Modern language server with excellent ARM support
-- **Cortex-Debug** (`marus25.cortex-debug`) - ARM debugging with ST-Link support
+- **C/C++** (`ms-vscode.cpptools`) - IntelliSense for C/C++ (default configuration)
+- **Cortex-Debug** (`marus25.cortex-debug`) - ARM debugging with ST-Link and Black Magic Probe support
 
 **Optional:**
+- **clangd** (`llvm-vs-code-extensions.vscode-clangd`) - Alternative language server (faster, more accurate)
 - **Clang-Format** (`xaver.clang-format`) - Automatic code formatting
 - **Arm Assembly** (`dan-c-underwood.arm`) - Syntax highlighting for .lst files
 
-**Note**: C/C++ IntelliSense is intentionally disabled in favor of clangd for better performance and accuracy.
+### IntelliSense Configuration
+
+By default, the project uses **C/C++ IntelliSense** configured via `c_cpp_properties.json`.
+
+**To switch to clangd** (faster, more accurate):
+1. Install the clangd extension
+2. Uncomment the clangd settings in `.vscode/settings.json`
+3. Reload VS Code
 
 ### Automatic Configuration
-- **compile_commands.json**: Generated automatically with `make compile_commands` for IntelliSense
-- **clangd**: Pre-configured in `.vscode/settings.json` with ARM-specific arguments
+- **c_cpp_properties.json**: Pre-configured for C/C++ IntelliSense with correct paths and defines
+- **compile_commands.json**: Generated with `make compile_commands` (optional, works with both IntelliSense and clangd)
 - **Syntax Highlighting**: .lst files automatically associated with ARM assembly syntax
+
+## Debug Configurations
+
+The project includes 6 complete debug configurations for VS Code:
+
+### ST-Link (via stlink-tools)
+- **ST-Link Run**: Flash firmware and debug from main
+- **ST-Link Attach**: Attach to running firmware
+
+### Black Magic Probe
+- **Black Magic Probe Run**: Flash firmware and debug from main (includes built-in UART on `/dev/ttyACM1`)
+- **Black Magic Probe Attach**: Attach to running firmware
+
+### J-Link (via SEGGER JLinkGDBServer)
+- **J-Link Run**: Flash firmware and debug from main
+- **J-Link Attach**: Attach to running firmware
+
+### Makefile Flash Commands
+
+```bash
+make flash      # Flash via ST-Link
+make flash-bmp  # Flash via Black Magic Probe
+
+make reset      # Reset via ST-Link
+make reset-bmp  # Reset via Black Magic Probe
+```
+
+### Testing Status
+
+| Configuration | Flash | Debug | Stop/Detach | Notes |
+|--------------|-------|-------|-------------|-------|
+| ST-Link Run | ✅ | ✅ | ⚠️ | Toolbar remains open |
+| ST-Link Attach | ✅ | ✅ | ⚠️ | Toolbar remains open |
+| BMP Run | ✅ | ✅ | ⚠️ | UART on /dev/ttyACM1, toolbar remains open |
+| BMP Attach | ✅ | ✅ | ⚠️ | Toolbar remains open |
+| J-Link Run | ✅ | ✅ | ⚠️ | Requires SEGGER software, toolbar remains open |
+| J-Link Attach | ✅ | ✅ | ⚠️ | Requires SEGGER software, toolbar remains open |
+
+**Legend**: ✅ Tested and working | ❌ Not working | ⏳ Not yet tested | ⚠️ Works with cosmetic issue
+
+**Known Issue**: The VS Code debug toolbar remains visible after Stop/Detach in all configurations. This is a cosmetic issue only - the debugger stops/detaches correctly and the target behaves as expected (Run mode: continues execution, Attach mode: continues execution). Simply close the toolbar manually or start a new debug session.
 
 ## Dependencies
 
 - **ARM GCC toolchain** (`gcc-arm-none-eabi`) - Configure path in `Makefile`
 - **Make** - Standard build system
 - **VS Code** with recommended extensions
-- **ST-Link tools** (`stlink-tools`)
+- **ST-Link tools** (`stlink-tools`) - For ST-Link flash and debug
+- **Black Magic Probe** (optional) - Alternative debugger/programmer with built-in UART
+- **J-Link** (optional) - SEGGER J-Link debugger with SEGGER Software Pack
 - **bear** (optional) - For generating `compile_commands.json`
 
 **Note**: The ARM toolchain does not need to be in your system PATH - it's configured directly in the Makefile.
