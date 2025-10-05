@@ -167,22 +167,19 @@ make clean
 make compile_commands
 
 # Flash firmware to device (ST-Link)
-make flash
+make flash-st
 
 # Flash firmware to device (Black Magic Probe)
 make flash-bmp
 
-# Reset device (ST-Link)
-make reset
-
-# Reset device (Black Magic Probe)
-make reset-bmp
+# Flash firmware to device (J-Link)
+make flash-jlink
 
 # Show project information
 make info
 
 # Debug with VS Code
-# 8 configurations available: ST-Link, BMP, J-Link (OpenOCD), J-Link (Native)
+# 6 configurations available: ST-Link, BMP, J-Link
 # Each with Run (flash+debug) and Attach (debug only) modes
 ```
 
@@ -198,7 +195,6 @@ Available tasks:
 - Build Project
 - Clean Project
 - Flash Firmware
-- Reset Device
 
 ### Makefile Features
 
@@ -305,11 +301,9 @@ The project includes 6 complete debug configurations for VS Code:
 ### Makefile Flash Commands
 
 ```bash
-make flash      # Flash via ST-Link
-make flash-bmp  # Flash via Black Magic Probe
-
-make reset      # Reset via ST-Link
-make reset-bmp  # Reset via Black Magic Probe
+make flash-st    # Flash via ST-Link
+make flash-bmp   # Flash via Black Magic Probe
+make flash-jlink # Flash via J-Link
 ```
 
 ### Testing Status

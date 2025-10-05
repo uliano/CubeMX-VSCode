@@ -109,8 +109,8 @@ $(BUILD_DIR)/$(TARGET).lst: $(BUILD_DIR)/$(TARGET).elf
 	@$(OBJDUMP) -h -S $< | sed '/^ *[0-9a-f][0-9a-f]*:/!{/^[0-9a-f][0-9a-f]* <.*>:/!s/^[[:space:]]*\(.\)/@ \1/}' > $@
 
 # Flash firmware to device (ST-Link)
-flash: $(BUILD_DIR)/$(TARGET).elf
-	@echo "Flashing $(TARGET)..."
+flash-st: $(BUILD_DIR)/$(TARGET).elf
+	@echo "Flashing $(TARGET) via ST-Link..."
 	@st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 
 # Flash firmware with Black Magic Probe
@@ -125,20 +125,11 @@ flash-bmp: $(BUILD_DIR)/$(TARGET).elf
 		-ex "kill" \
 		$(BUILD_DIR)/$(TARGET).elf
 
-# Reset device (ST-Link)
-reset:
-	@echo "Resetting device..."
-	@st-flash reset
-
-# Reset device (Black Magic Probe)
-reset-bmp:
-	@echo "Resetting device via Black Magic Probe..."
-	@arm-none-eabi-gdb --batch \
-		-ex "target extended-remote /dev/ttyACM0" \
-		-ex "monitor swdp_scan" \
-		-ex "attach 1" \
-		-ex "monitor reset" \
-		-ex "kill"
+# Flash firmware with J-Link
+flash-jlink: $(BUILD_DIR)/$(TARGET).hex
+	@echo "Flashing $(TARGET) via J-Link..."
+	@JLinkExe -device STM32F401xC -if SWD -speed 4000 -autoconnect 1 \
+		-CommanderScript /dev/stdin <<< "r\nloadfile $(BUILD_DIR)/$(TARGET).hex\nr\ng\nq"
 
 # Clean build artifacts
 clean:
@@ -157,4 +148,4 @@ info:
 	@echo "ASM sources ($(words $(ASM_SOURCES))): $(ASM_SOURCES)"
 	@echo "Include dirs ($(words $(INCLUDE_DIRS))): $(INCLUDE_DIRS)"
 
-.PHONY: all clean compile_commands info flash flash-bmp reset reset-bmp
+.PHONY: all clean compile_commands info flash-st flash-bmp flash-jlink
